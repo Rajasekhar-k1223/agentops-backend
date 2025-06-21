@@ -1,0 +1,32 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2
+psycopg2-binary
+pymongo
+pydantic
+requests
+python-dotenv
+scapy
+python-nmap
+
+# LangChain & OpenAI
+langchain
+openai
+faiss-cpu
+
+# Streamlit (optional for demo UI)
+streamlit
+
+# For optional NLP/log parsing
+spacy
+nltk
+
+# Optional: for WebSocket support if used in FastAPI
+websockets
+
+# Optional: CORS middleware if frontend connects separately
+fastapi[all]
+
+# OS-independent system calls
+platformdirs
