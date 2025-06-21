@@ -4,7 +4,7 @@ import nmap
 
 
 def scan_network(ip_range):
-    # Create ARP packet to discover devices
+    # Discover devices using ARP
     packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip_range)
     result = srp(packet, timeout=3, verbose=False)[0]
 
@@ -15,35 +15,42 @@ def scan_network(ip_range):
         ip = received.psrc
         mac = received.hwsrc
 
-        # Get hostname
+        # Get hostname via reverse DNS
         try:
             hostname = socket.gethostbyaddr(ip)[0]
         except socket.herror:
             hostname = "unknown"
 
-        # Use nmap to scan for vendor and OS
+        # Default values
+        vendor = "unknown"
+        os_guess = "unknown"
+        os_accuracy = "0%"
+
         try:
             nm.scan(hosts=ip, arguments="-O")
-            vendor = "unknown"
-            os_guess = "unknown"
 
-            # Extract vendor (if available)
-            if 'macaddress' in nm[ip] and 'vendor' in nm[ip]['macaddress']:
-                vendor = list(nm[ip]['macaddress']['vendor'].values())[0]
+            if ip in nm.all_hosts():
+                # Extract OS details
+                os_matches = nm[ip].get("osmatch", [])
+                if os_matches:
+                    os_guess = os_matches[0].get("name", "unknown")
+                    os_accuracy = os_matches[0].get("accuracy", "0") + "%"
 
-            # Extract OS guess
-            if 'osmatch' in nm[ip] and nm[ip]['osmatch']:
-                os_guess = nm[ip]['osmatch'][0]['name']
+                # Extract MAC vendor
+                if 'addresses' in nm[ip] and 'mac' in nm[ip]['addresses']:
+                    mac_addr = nm[ip]['addresses']['mac']
+                    vendor = nm[ip].get("vendor", {}).get(mac_addr, "unknown")
+
         except Exception as e:
-            vendor = "unknown"
-            os_guess = "unknown"
+            print(f"Nmap scan failed for {ip}: {e}")
 
         devices.append({
             "ip": ip,
             "mac": mac,
             "hostname": hostname,
             "vendor": vendor,
-            "os": os_guess
+            "os": os_guess,
+            "os_accuracy": os_accuracy
         })
 
     return devices
