@@ -9,10 +9,11 @@ requests
 python-dotenv
 scapy
 python-nmap
+PyJWT>=2.0.0
 
 # LangChain & OpenAI
 langchain
-openai
+openai==0.28
 faiss-cpu
 
 # Streamlit (optional for demo UI)
