@@ -905,8 +905,21 @@ def list_commands():
     return {"message": "commands listing not implemented"}
 
 @app.get("/tasks")
-def list_tasks():
-    return {"message": "tasks listing not implemented"}
+def list_tasks(db: Session = Depends(get_db)):
+    tasks = db.query(Task).all()
+    return [
+        {
+            "task_id": t.task_id,
+            "agent_id": t.agent_id,
+            "os_type": t.os_type,
+            "command": t.command,
+            "status": t.status,
+            "stdout": t.stdout,
+            "stderr": t.stderr,
+            "returncode": t.returncode,
+        }
+        for t in tasks
+    ]
 
 @app.get("/log-summary/{agent_id}")
 def log_summary(agent_id: str):
